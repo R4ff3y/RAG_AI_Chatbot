@@ -24,8 +24,15 @@ Congratulations your data is now inside of the database.
  ## System prompt
  The System prompt is defined inside of `chatbot.py`. Feel free to adjust to achieve better results. It should include the phrases:
  * Only answer using data from the given documents
- * Do not make up data but instead say "I don't know"
+ * Do not makeup data but instead say "I don't know"
  * Include the Chapter in which you found the data \
 And Some form of explanation that its Job is to assist with Questions regarding the Document.
 ## Query
 Any user question will be sent to the database using an enhanced text query using Ada. Inside of `chatbot.py`
+The line `reviews_retriever = reviews_vector_db.as_retriever(k=30)` retrieves the data from the database. \
+The parameter `k` selects how many chunks from the database should be received. If `k` is too large you risk receiving inaccurate answers.
+If `k` is too small, there will be insufficient data sent to the chatbot, yielding no usable result. 
+
+## Chatbot
+To run the Chatbot locally execute `python main.py`. This will start a local server instance you can access using your browser. \
+To run it online change `demo.launch()` to `demo.launch("shared=True")`. The Interface is made using gradio. 
