@@ -11,7 +11,7 @@ Run the following commands inside the active Environment: \
 `pip install PyPDF2`
 
 I could be missing some, check what libraries are missing and install them according to their respective documentation. \
-inside the main folder create a  .env file and insert your OpenAI API Key. `OPEN_API:KEY=[YOUR KEY]` \
+inside the main folder create a  .env file and insert your OpenAI API Key. `OPEN_API_KEY=[YOUR KEY]` \
 Create a folder named input inside the `data` folder and insert the needed PDFs.
 ## Extracting the data
 Navigate inside the data folder and run `python PDF_Extraction.py` \
