@@ -19,6 +19,10 @@ This will:
 * Turn the PDF into text.
 * Split the text into smaller chunks
 * Embed the Text into a Database using OpenAI Ada embedding \
+It will also:
+* Extract all images of the PDF \
+* Use GPT4 to summarize them \
+* Embed the summary into the database using OpenAI Ada embedding \
 Congratulations your data is now inside of the database.
 
  ## System prompt
