@@ -64,12 +64,12 @@ def file_processing():
                 description = get_image_description(image_path)
                 descriptions.append(description)
 
-            embeddings = []
+            picture_embeddings = []
             for description in descriptions:
                 embedding = get_embedding(description)
-                embeddings.append(embedding)
+                picture_embeddings.append(embedding)
 
-            for i, embedding in enumerate(embeddings):
+            for i, embedding in enumerate(picture_embeddings):
                 metadata = {"description": descriptions[i]}
                 collection.add(
                     embeddings=embedding,
@@ -121,7 +121,8 @@ def main():
 
     coll_name = str(input("Please enter the collection name: "))
 
-    client.delete_collection(name=coll_name)
+    # client.delete_collection(name=coll_name)
+
     global collection 
     collection = client.create_collection(name=coll_name)
     file_processing()
