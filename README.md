@@ -1,1 +1,31 @@
 # RAG_AI_Chatbot
+## Preface
+For our Code to run you need an [OpenAI](https://openai.com/de-DE/) Account. 
+## Prequisites
+Set up a Virtual Python 3.10 Environment with [VENV](https://realpython.com/python-virtual-environments-a-primer/).
+Run the following commands inside the active Environment: \
+` python -m pip install langchain==0.1.0 openai==1.7.2 langchain-openai==0.0.2 langchain-community==0.0.12 langchainhub==0.1.14 ` \
+` python -m pip install python-dotenv `\
+` python -m pip install chromadb==0.4.22 `\
+`pip install gradio` \
+`pip install PyPDF2`
+
+I could be missing some, check what libraries are missing and install them according to their respective documentation. \
+inside the main folder create a  .env file and insert your OpenAI API Key. `OPEN_API:KEY=[YOUR KEY]` \
+Create a folder named input inside the `data` folder and insert the needed PDFs.
+## Extracting the data
+Navigate inside the data folder and run `python PDF_Extraction.py` \
+This will:
+* Turn the PDF into text.
+* Split the text into smaller chunks
+* Embed the Text into a Database using OpenAI Ada embedding \
+Congratulations your data is now inside of the database.
+
+ ## System prompt
+ The System prompt is defined inside of `chatbot.py`. Feel free to adjust to achieve better results. It should include the phrases:
+ * Only answer using data from the given documents
+ * Do not make up data but instead say "I don't know"
+ * Include the Chapter in which you found the data \
+And Some form of explanation that its Job is to assist with Questions regarding the Document.
+## Query
+Any user question will be sent to the database using an enhanced text query using Ada. Inside of `chatbot.py`
