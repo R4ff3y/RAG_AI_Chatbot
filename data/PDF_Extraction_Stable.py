@@ -8,7 +8,7 @@ from PIL import Image
 import io
 from openai import OpenAI
 import base64
-
+import glob
 import dotenv
 
 dotenv.load_dotenv()
@@ -77,6 +77,9 @@ def main():
     file_processing()
 
     # TODO bilder löschen am ende
+    files = glob.glob('data\pictures')
+    for f in files:
+        os.remove(f)
 
 if __name__ == '__main__':
     main()

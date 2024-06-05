@@ -9,7 +9,7 @@ import io
 from openai import OpenAI
 import base64
 
-AI_Client = OpenAI()
+AI_Client = OpenAI(api_key="OPENAI_API_KEY")
 import dotenv
 
 dotenv.load_dotenv()
@@ -170,6 +170,9 @@ def main():
     file_processing()
 
     # TODO bilder löschen am ende
+    files = glob.glob('data\pictures')
+    for f in files:
+        os.remove(f)
 
 if __name__ == '__main__':
     main()

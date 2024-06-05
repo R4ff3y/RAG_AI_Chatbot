@@ -1,5 +1,7 @@
 # dotenv variable files
 .env
-
 data/input
 venv/
+chroma_data/
+data/pictures
+RAG_Model\__pycache__
