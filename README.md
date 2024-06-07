@@ -15,7 +15,8 @@ I could be missing some, check what libraries are missing and install them accor
 inside the main folder create a  .env file and insert your OpenAI API Key. OPENAI_API_KEY=[YOUR KEY] \
 Create a folder named input inside the `data` folder and insert the needed PDFs.
 ## Extracting the data
-Navigate inside the data folder and run `python PDF_Extraction.py` \
+Navigate inside the data folder and run `python PDF_Extraction_Stable.py` \
+When asked call the Collection "langchain".\
 This will:
 * Turn the PDF into text.
 * Split the text into smaller chunks
