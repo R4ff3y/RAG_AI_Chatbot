@@ -17,8 +17,8 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
     ChatPromptTemplate,
 )
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+from elasticsearch import Elasticsearch
+import os
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
@@ -28,9 +28,9 @@ from langchain_elasticsearch import ElasticsearchStore
 import elasticsearch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from huggingface_hub import login
-login(token="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")
+login(token=os.getenv("HUGGINGFACE_API_KEY"))
 
-REVIEWS_CHROMA_PATH = "chroma_data/"
+
 
 dotenv.load_dotenv()
 
@@ -71,19 +71,58 @@ model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float
 chat_model = model
 
 def pdf_to_text(file_path):
-    pdf_file = open(file_path, 'rb')
-    pdf_reader = PyPDF2.PdfReader(pdf_file)
-    text = ""
-    for page_num in range(len(pdf_reader.pages)):
-        text += pdf_reader.pages[page_num].extract_text()
-    pdf_file.close()
+    """Extract text from a PDF file."""
+    with open(file_path, 'rb') as pdf_file:
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page_num in range(len(pdf_reader.pages)):
+            text += pdf_reader.pages[page_num].extract_text()
     return text
 
-loader = pdf_to_text("wow.pdf")
+def process_pdfs_in_folder(input_folder):
+    """Process all PDFs in the specified folder."""
+    all_text = ""
+    for file_name in os.listdir(input_folder):
+        if file_name.endswith('.pdf'):
+            file_path = os.path.join(input_folder, file_name)
+            print(f"Processing {file_path}")
+            all_text += pdf_to_text(file_path) + "\n"
+    return all_text
+
+# Specify the input folder containing PDF files
+input_folder = "RAG_Model\\Drinmach"
+
+# Process all PDFs in the input folder
+loader = process_pdfs_in_folder(input_folder)
+
+# Split text into chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 docs = text_splitter.split_text(loader)
 
+# Embed and store the documents in Elasticsearch
 embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+es = Elasticsearch("http://localhost:9200")
+
+# Create an index in Elasticsearch
+index_name = "test-basic"
+
+# Define the index settings and mappings
+index_settings = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "properties": {
+            "text": {"type": "text"},
+            "embedding": {"type": "dense_vector", "dims": 1536}  # Adjust dims based on your embedding model
+        }
+    }
+}
+
+# Create the index
+if not es.indices.exists(index=index_name):
+    es.indices.create(index=index_name, body=index_settings)
 db = ElasticsearchStore.from_texts(
     docs,
     embeddings,
@@ -91,45 +130,12 @@ db = ElasticsearchStore.from_texts(
     index_name="test-basic",
 )
 
+# Refresh the Elasticsearch index
 db.client.indices.refresh(index="test-basic")
 
-#def retriever(query):
-#    results = db.similarity_search(query, 5)
-#    print(results)
-#    return results
-def retriever(query, threshold=0.8):
-    # Retrieve initial results
-    results = db.similarity_search(query, 30)
-    unique_results = []
-    seen_vectors = []
-
-    for result in results:
-        # Debug: Print the structure of result
-        print("Result:", result)
-        
-        # Ensure the text field is correctly accessed
-        text = result['text'] if 'text' in result else result.get('content', '')
-
-        if not text:
-            continue
-
-        # Get the vector representation of the result
-        vector = embeddings.embed_query(text)
-        
-        # Check similarity with seen vectors
-        if seen_vectors:
-            similarities = cosine_similarity([vector], seen_vectors)
-            max_similarity = np.max(similarities)
-        else:
-            max_similarity = 0
-
-        # If the max similarity is below the threshold, consider it as unique
-        if max_similarity < threshold:
-            unique_results.append(result)
-            seen_vectors.append(vector)
-
-    return unique_results
-
+def retriever(query):
+    results = db.similarity_search(query, 5)
+    return results
 
 # Function to convert string to tensor
 def text_to_tensor(text, tokenizer):
