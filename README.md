@@ -13,7 +13,7 @@ Run the following commands inside the active Environment: \
 
 I could be missing some, check what libraries are missing and install them according to their respective documentation. \
 inside the main folder create a  .env file and insert your OpenAI API Key. OPENAI_API_KEY=[YOUR KEY] \
-Create a folder named input inside the `data` folder and insert the needed PDFs.
+Create a folder named input inside the `data` folder and insert the needed PDFs. Also inside of `data` create a folder called pictures. You can leave it empty. It will temporarily store the pictues extracted from the PDFs. 
 ## Extracting the data
 Navigate inside the data folder and run `python PDF_Extraction.py` \
 This will:

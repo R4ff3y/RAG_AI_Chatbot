@@ -1,12 +1,12 @@
 from RAG_Model.chatbot import review_chain
+from RAG_Model.chatbot import retriever
 import gradio as gr
 
-# question = str(input("Please enter your question: "))
-
 def ask_chatbot(question, history):
-    return review_chain.invoke(question)
+    context = retriever(question)
+    input_data = {"context": context, "question": question}
+    return review_chain.invoke(input_data)
 
-demo = gr.ChatInterface(fn=ask_chatbot, title="Hydac GPT", 
-                        theme='soft')
+demo = gr.ChatInterface(fn=ask_chatbot, title="HIVE", theme='soft')
 
 demo.launch()

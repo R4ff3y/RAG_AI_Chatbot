@@ -5,3 +5,6 @@ venv/
 chroma_data/
 data/pictures
 RAG_Model\__pycache__
+RAG_Model\.env
+RAG_Model\wow.pdf
+wow.pdf

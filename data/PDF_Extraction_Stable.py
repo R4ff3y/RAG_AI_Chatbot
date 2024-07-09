@@ -10,6 +10,7 @@ from openai import OpenAI
 import base64
 import glob
 import dotenv
+from elasticsearch import Elasticsearch
 
 dotenv.load_dotenv()
 
@@ -27,9 +28,33 @@ def pdf_to_text(file_path):
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 embeddings = OpenAIEmbeddings()
 
-# Initialize Chroma DB client
-client = chromadb.PersistentClient(path="../chroma_data")
+# Initialize ES client
+es = Elasticsearch("http://localhost:9200/", api_key=os.getenv('ELASTICSEARCH_API_KEY'))
 
+# Define the index name
+index_name = "my_vector_index"
+
+# Define the index mapping
+mapping = {
+    "mappings": {
+        "properties": {
+            "vector": {
+                "type": "dense_vector",
+                "dims": 1536  # Ada embedding dimension
+            },
+            "metadata": {
+                "type": "text"
+            },
+            "text": {
+                "type": "text"
+            }
+        }
+    }
+}
+
+# Create the index
+if not es.indices.exists(index=index_name):
+    es.indices.create(index=index_name, body=mapping)
 processed_documents = set()
 
 # Process each PDF in the ./input directory
@@ -65,21 +90,18 @@ def file_processing():
 
 def main():
 
-    coll_name = str(input("Please enter the collection name: "))
+    
 
-    curr_colls = client.list_collections()
+    curr_colls = es.list_collections()
 
     if (any(coll.name == coll_name for coll in curr_colls)):
-        client.delete_collection(name=coll_name)
+        es.delete_collection(name=coll_name)
 
     global collection 
-    collection = client.create_collection(name=coll_name)
+    collection = es.create_collection(name=coll_name)
     file_processing()
 
-    # TODO bilder löschen am ende
-    files = glob.glob('data\pictures')
-    for f in files:
-        os.remove(f)
+    # TODO bilder löschen am ende    
 
 if __name__ == '__main__':
     main()
